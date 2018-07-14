@@ -463,7 +463,22 @@ void fn1() {
 //
 // Current functions: none.
 void fn2() {
-
+  if(currentChord[0][1])
+    debounceMillis = 0;
+  else if(currentChord[0][2])
+    debounceMillis = 10;
+  else if(currentChord[0][3])
+    debounceMillis = 20;
+  else if(currentChord[0][4])
+    debounceMillis = 30;
+  else if(currentChord[0][6])
+    debounceMillis = 40;
+  else if(currentChord[0][7])
+    debounceMillis = 50;
+  else if(currentChord[0][8])
+    debounceMillis = 60;
+  else if(currentChord[0][9])
+    debounceMillis = 70;
 }
 
 // Fn1-Fn2 functions
