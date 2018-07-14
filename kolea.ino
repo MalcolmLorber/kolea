@@ -26,7 +26,7 @@
 #define COLS 11
 #define PROTOCOL_ADDR 11
 #define DELAY_ADDR 12
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 /* The following matrix is shown here for reference only.
 char keys[ROWS][COLS] = {
     {' ', '2', '3', '4', '5', ' ', '7', '8', '9', '0', ' '},
