@@ -508,5 +508,12 @@ void fn1fn2() {
       analogWrite(ledPin, ledIntensity);
     }
   }
+  if(currentChord[1][5]||currentChord[2][5]){
+    if(currentChord[1][10]){
+      EEPROM.write(DELAY_ADDR, debounceMillis);
+    }
+    if(currentChord[2][10]){
+      EEPROM.write(PROTOCOL_ADDR, protocol);
+    }
+  }
 }
-
