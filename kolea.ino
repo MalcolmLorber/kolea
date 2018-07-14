@@ -20,9 +20,12 @@
 /**
  * Matrix modified for the Kolea keyboard.
  */
- 
+#include <EEPROM.h>
+
 #define ROWS 4
 #define COLS 11
+#define PROTOCOL_ADDR 11
+#define DELAY_ADDR 12
 
 /* The following matrix is shown here for reference only.
 char keys[ROWS][COLS] = {
@@ -58,6 +61,16 @@ int protocol = GEMINI;
 void setup() {
   Keyboard.begin();
   Serial.begin(9600);
+  protocol = EEPROM.read(PROTOCOL_ADDR);
+  if(protocol>2 || protocol <0){
+    protocol = 0;
+    EEPROM.write(PROTOCOL_ADDR, 0);
+  }
+  debounceMillis = EEPROM.read(DELAY_ADDR);
+  if(debounceMillis > 100 || debounceMillis < 0){
+    debounceMillis = 20;
+    EEPROM.write(DELAY_ADDR, 20);
+  }
   for (int i = 0; i < COLS; i++)
     pinMode(colPins[i], INPUT_PULLUP);
   for (int i = 0; i < ROWS; i++) {
