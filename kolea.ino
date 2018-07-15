@@ -116,6 +116,9 @@ boolean recordCurrentKeys() {
         currentChord[i][j] = true;
         isAnyKeyPressed = true;
       }
+      else if (debouncing[i][j] && (micros() - debouncingMicros[i][j] / 1000 < debounceMillis)){
+	isAnyKeyPressed = true;
+      }
     }
   }
   return isAnyKeyPressed;
