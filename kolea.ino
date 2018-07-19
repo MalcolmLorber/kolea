@@ -87,17 +87,22 @@ void loop() {
 
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
+      //we see if state has changed AND been given time to debounce
       if ((keyReadings[i][j] != currentChord[i][j]) && (curTime - debouncingMillis[i][j] >= debounceMillis)) {
+        //add the key to the chord if it was pressed, and start a chord if not already
         if (keyReadings[i][j]) {
           currentChord[i][j] = true;
           inProgress = true;
         }
+        //update the debounced key reading and set the last debounced time for that key
         realKeys[i][j] = keyReadings[i][j];
         debouncingMillis[i][j] = curTime;
       }
+      //see if any DEBOUNCED keys are actually being pressed
       anyPressed |= realKeys[i][j];
     }
   }
+  //if no keys are pressed and a chord was started, we send the chord
   if (!anyPressed && inProgress) {
     sendChord();
     clearMatrix(currentChord);
@@ -116,7 +121,7 @@ void readKeys() {
   for (int i = 0; i < ROWS; i++) {
     digitalWrite(rowPins[i], LOW);
     for (int j = 0; j < COLS; j++)
-      keyReadings[i][j] = digitalRead(colPins[j]) == LOW ? true : false;
+      keyReadings[i][j] = !digitalRead(colPins[j]);// == LOW ? true : false;
     digitalWrite(rowPins[i], HIGH);
   }
 }
