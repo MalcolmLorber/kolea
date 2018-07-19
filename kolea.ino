@@ -40,7 +40,7 @@ int rowPins[ROWS] = {4, 5, 6, 7};
 int colPins[COLS] = {8, 9, 10, 11, 12, 14, 15, 16, 18, 19, 20};
 
 // Keyboard state variables
-long debounceMillis = 20;
+unsigned long debounceMillis = 20;
 bool inProgress = false;
 bool currentChord[ROWS][COLS];
 bool keyReadings[ROWS][COLS];
@@ -80,7 +80,7 @@ void setup() {
 
 // Read key states and handle all chord events
 void loop() {
-  long curTime = millis();
+  unsigned long curTime = millis();
   readKeys();
 
   bool anyPressed = false;
@@ -108,7 +108,6 @@ void loop() {
     clearMatrix(currentChord);
     inProgress = false;
   }
-
 }
 
 // Set all values of the passed matrix to 0/false
@@ -137,7 +136,6 @@ void sendChordNkro() {
   };
   int keyCounter = 0;
   char qwertyKeys[ROWS * COLS];
-  boolean firstKeyPressed = false;
 
   // Calculate qwerty keys array using qwertyMappings[][]
   for (int i = 0; i < ROWS; i++) {
@@ -175,8 +173,6 @@ void sendChordGemini() {
     {0,  0,  0,  2,  2,  0,  3,  3,  0,  0,  0}
   };
 
-
-
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
       if (currentChord[i][j]) {
@@ -191,8 +187,7 @@ void sendChordGemini() {
 }
 
 void sendChordTxBolt() {
-  byte chordBytes[] = {B0, B0, B0, B0, B0};
-  int index = 0;
+  byte chordBytes[] = {B0, B0, B0, B0};
 
   // TX Bolt uses a variable length packet. Only those bytes that have active
   // keys are sent. The header bytes indicate which keys are being sent. They
@@ -200,73 +195,31 @@ void sendChordTxBolt() {
   // 00XXXXXX 01XXXXXX 10XXXXXX 110XXXXX
   //   HWPKTS   UE*OAR   GLBPRF    #ZDST
 
-  // byte 1
-  // S-
-  if (currentChord[1][1] || currentChord[2][1]) chordBytes[index] |= B00000001;
-  // T-
-  if (currentChord[1][2]) chordBytes[index] |= B00000010;
-  // K-
-  if (currentChord[2][2]) chordBytes[index] |= B00000100;
-  // P-
-  if (currentChord[1][3]) chordBytes[index] |= B00001000;
-  // W-
-  if (currentChord[2][3]) chordBytes[index] |= B00010000;
-  // H-
-  if (currentChord[1][4]) chordBytes[index] |= B00100000;
-  // Increment the index if the current byte has any keys set.
-  if (chordBytes[index]) index++;
+  unsigned int boltVals[ROWS][COLS] =
+  { {0, 208, 208, 208, 208,   0, 208, 208, 208, 208,   0},
+    {0,   1,   2,   8,  32,  72, 129, 132, 144, 193, 196},
+    {0,   1,   4,  16,  65,  72, 130, 136, 160, 194, 200},
+    {0,   0,   0,  66,  68,   0,  80,  96,   0,   0,   0}
+  };
+  unsigned int boltByte[ROWS][COLS] =
+  { {0,   3,   3,   3,   3,   0,   3,   3,   3,   3,   0},
+    {0,   0,   0,   0,   0,   1,   2,   2,   2,   3,   3},
+    {0,   0,   0,   0,   1,   1,   2,   2,   2,   3,   3},
+    {0,   0,   0,   1,   1,   0,   1,   1,   0,   0,   0}
+  };
 
-  // byte 2
-  // R-
-  if (currentChord[2][4]) chordBytes[index] |= B01000001;
-  // A
-  if (currentChord[3][3]) chordBytes[index] |= B01000010;
-  // O
-  if (currentChord[3][4]) chordBytes[index] |= B01000100;
-  // *
-  if (currentChord[1][5] || currentChord[2][5]) chordBytes[index] |= B01001000;
-  // E
-  if (currentChord[3][6]) chordBytes[index] |= B01010000;
-  // U
-  if (currentChord[3][7]) chordBytes[index] |= B01100000;
-  // Increment the index if the current byte has any keys set.
-  if (chordBytes[index]) index++;
-
-  // byte 3
-  // -F
-  if (currentChord[1][6]) chordBytes[index] |= B10000001;
-  // -R
-  if (currentChord[2][6]) chordBytes[index] |= B10000010;
-  // -P
-  if (currentChord[1][7]) chordBytes[index] |= B10000100;
-  // -B
-  if (currentChord[2][7]) chordBytes[index] |= B10001000;
-  // -L
-  if (currentChord[1][8]) chordBytes[index] |= B10010000;
-  // -G
-  if (currentChord[2][8]) chordBytes[index] |= B10100000;
-  // Increment the index if the current byte has any keys set.
-  if (chordBytes[index]) index++;
-
-  // byte 4
-  // -T
-  if (currentChord[1][9]) chordBytes[index] |= B11000001;
-  // -S
-  if (currentChord[2][9]) chordBytes[index] |= B11000010;
-  // -D
-  if (currentChord[1][10]) chordBytes[index] |= B11000100;
-  // -Z
-  if (currentChord[2][10]) chordBytes[index] |= B11001000;
-  // #
-  if (currentChord[0][1] || currentChord[0][2] || currentChord[0][3] || currentChord[0][4] || currentChord[0][6] || currentChord[0][7] || currentChord[0][8] || currentChord[0][9]) chordBytes[index] |= B11010000;
-  // Increment the index if the current byte has any keys set.
-  if (chordBytes[index]) index++;
-
-  // Now we have index bytes followed by a zero byte where 0 < index <= 4.
-  index++; // Increment index to include the trailing zero byte.
-  for (int i = 0; i < index; i++) {
-    Serial.write(chordBytes[i]);
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLS; j++) {
+      if (currentChord[i][j]) {
+        chordBytes[boltByte[i][j]] |= boltVals[i][j];
+      }
+    }
   }
+  for (int i = 0; i < 4; i++) {
+    if (chordBytes[i])
+      Serial.write(chordBytes[i]);
+  }
+  Serial.write(B0);
 }
 
 // Send the chord using the current protocol. If there are fn keys
