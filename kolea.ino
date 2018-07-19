@@ -1,5 +1,7 @@
 /**
    StenoFW is a firmware for Stenoboard keyboards.
+   
+   Modifications for kolea board by Malcolm Lorber
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,10 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
    Copyright 2014 Emanuele Caruso. See LICENSE.txt for details.
-*/
-
-/**
-   Matrix modified for the Kolea keyboard.
+   
+   Copyright 2018 Malcolm Lorber
 */
 #include <EEPROM.h>
 
