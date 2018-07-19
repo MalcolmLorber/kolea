@@ -49,7 +49,7 @@ int protocol = GEMINI;
 void setup() {
   Keyboard.begin();
   Serial.begin(9600);
-  
+
   //read stored values from eeprom and sanity check them
   protocol = EEPROM.read(PROTOCOL_ADDR);
   if (protocol > 2 || protocol < 0) {
@@ -63,8 +63,9 @@ void setup() {
   }
 
   //set up key matrix
-  for (int i = 0; i < COLS; i++)
+  for (int i = 0; i < COLS; i++) {
     pinMode(colPins[i], INPUT_PULLUP);
+  }
   for (int i = 0; i < ROWS; i++) {
     pinMode(rowPins[i], OUTPUT);
     digitalWrite(rowPins[i], HIGH);
@@ -77,7 +78,7 @@ void setup() {
 // Read key states and handle all chord events
 void loop() {
   unsigned long curTime = millis();
-  
+
   //read raw key matrix, may be bouncy
   for (int i = 0; i < ROWS; i++) {
     digitalWrite(rowPins[i], LOW);
@@ -120,8 +121,8 @@ void clearMatrix(bool m[][COLS]) {
 
 // Send current chord using NKRO Keyboard emulation
 void sendChordNkro() {
-  char qwertyMapping[ROWS][COLS] = {
-    {' ', '2', '3', '4', '5', ' ', '7', '8', '9', '0', ' '},
+  char qwertyMapping[ROWS][COLS] =
+  { {' ', '2', '3', '4', '5', ' ', '7', '8', '9', '0', ' '},
     {' ', 'q', 'w', 'e', 'r', 't', 'u', 'i', 'o', 'p', '['},
     {' ', 'a', 's', 'd', 'f', 'g', 'j', 'k', 'l', ';', '\''},
     {' ', ' ', ' ', 'c', 'v', ' ', 'n', 'm', ' ', ' ', ' '}
@@ -130,7 +131,7 @@ void sendChordNkro() {
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
       if (currentChord[i][j]) {
-        if(qwertyMapping[i][j]!=' '){
+        if (qwertyMapping[i][j] != ' ') {
           Keyboard.press(qwertyMapping[i][j]);
         }
       }
@@ -200,25 +201,29 @@ void sendChordTxBolt() {
   Serial.write(B0); //trailing 0 byte for stability
 }
 
-// Send the chord using the current protocol. 
+// Send the chord using the current protocol.
 void sendChord() {
   // If fn keys have been pressed, delegate to corresponding method and return
   if (currentChord[1][0] && currentChord[2][0]) {
     fn1fn2();
     return;
-  } else if (currentChord[1][0]) {
+  }
+  else if (currentChord[1][0]) {
     fn1();
     return;
-  } else if (currentChord[2][0]) {
+  }
+  else if (currentChord[2][0]) {
     fn2();
     return;
   }
 
   if (protocol == NKRO) {
     sendChordNkro();
-  } else if (protocol == GEMINI) {
+  }
+  else if (protocol == GEMINI) {
     sendChordGemini();
-  } else {
+  }
+  else {
     sendChordTxBolt();
   }
 }
