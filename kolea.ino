@@ -111,9 +111,9 @@ void loop() {
 
 }
 
-// Set all values of the passed matrix to the given value
-void clearMatrix(boolean booleanMatrix[][COLS]) {
-  memset(booleanMatrix, 0, sizeof(booleanMatrix[0][0])*ROWS * COLS);
+// Set all values of the passed matrix to 0/false
+void clearMatrix(bool m[][COLS]) {
+  memset(m, 0, sizeof(m[0][0])*ROWS * COLS);
 }
 
 // Read all keys
@@ -121,7 +121,7 @@ void readKeys() {
   for (int i = 0; i < ROWS; i++) {
     digitalWrite(rowPins[i], LOW);
     for (int j = 0; j < COLS; j++)
-      keyReadings[i][j] = !digitalRead(colPins[j]);// == LOW ? true : false;
+      keyReadings[i][j] = !digitalRead(colPins[j]);
     digitalWrite(rowPins[i], HIGH);
   }
 }
@@ -140,18 +140,18 @@ void sendChordNkro() {
   boolean firstKeyPressed = false;
 
   // Calculate qwerty keys array using qwertyMappings[][]
-  for (int i = 0; i < ROWS; i++)
-    for (int j = 0; j < COLS; j++)
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLS; j++) {
       if (currentChord[i][j]) {
         qwertyKeys[keyCounter] = qwertyMapping[i][j];
         keyCounter++;
       }
+    }
+  }
   // Emulate keyboard key presses
   for (int i = 0; i < keyCounter; i++) {
     if (qwertyKeys[i] != ' ') {
       Keyboard.press(qwertyKeys[i]);
-      if (!firstKeyPressed) firstKeyPressed = true;
-      else Keyboard.release(qwertyKeys[i]);
     }
   }
   Keyboard.releaseAll();
@@ -161,7 +161,29 @@ void sendChordNkro() {
 void sendChordGemini() {
   // Initialize chord bytes
   byte chordBytes[] = {B10000000, B0, B0, B0, B0, B0};
+  unsigned int geminiVals[ROWS][COLS] =
+  { {0,  1,  1,  1,  1,  0,  1,  1,  1,  1,  0},
+    {0, 64, 16,  4,  1,  8,  2, 64, 16,  4,  1},
+    {0, 64,  8,  2, 64,  8,  1, 32,  8,  2,  1},
+    {0,  0,  0, 32, 16,  0,  8,  4,  0,  0,  0}
+  };
 
+  unsigned int geminiByte[ROWS][COLS] =
+  { {0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {0,  1,  1,  1,  1,  2,  3,  4,  4,  4,  4},
+    {0,  1,  1,  1,  2,  2,  3,  4,  4,  4,  5},
+    {0,  0,  0,  2,  2,  0,  3,  3,  0,  0,  0}
+  };
+
+
+
+  for (int i = 0; i < ROWS; i++) {
+    for (int j = 0; j < COLS; j++) {
+      if (currentChord[i][j]) {
+        chordBytes[geminiByte[i][j]] |= geminiVals[i][j];
+      }
+    }
+  }/*
   // Byte 0
   //#
   if (currentChord[0][1] || currentChord[0][2] || currentChord[0][3] || currentChord[0][4] || currentChord[0][6] || currentChord[0][7] || currentChord[0][8] || currentChord[0][9]) {
@@ -171,101 +193,101 @@ void sendChordGemini() {
   // Byte 1
   //S
   if (currentChord[1][1] || currentChord[2][1]) {
-    chordBytes[1] += B01000000;
+    chordBytes[1] |= B01000000;
   }
   //T
   if (currentChord[1][2]) {
-    chordBytes[1] += B00010000;
+    chordBytes[1] |= B00010000;
   }
   //K
   if (currentChord[2][2]) {
-    chordBytes[1] += B00001000;
+    chordBytes[1] |= B00001000;
   }
   //P
   if (currentChord[1][3]) {
-    chordBytes[1] += B00000100;
+    chordBytes[1] |= B00000100;
   }
   //W
   if (currentChord[2][3]) {
-    chordBytes[1] += B00000010;
+    chordBytes[1] |= B00000010;
   }
   //H
   if (currentChord[1][4]) {
-    chordBytes[1] += B00000001;
+    chordBytes[1] |= B00000001;
   }
 
   // Byte 2
   //R
   if (currentChord[2][4]) {
-    chordBytes[2] += B01000000;
+    chordBytes[2] |= B01000000;
   }
   //W
   if (currentChord[3][3]) {
-    chordBytes[2] += B00100000;
+    chordBytes[2] |= B00100000;
   }
   //O
   if (currentChord[3][4]) {
-    chordBytes[2] += B00010000;
+    chordBytes[2] |= B00010000;
   }
   //*
   if (currentChord[1][5] || currentChord[2][5]) {
-    chordBytes[2] += B00001000;
+    chordBytes[2] |= B00001000;
   }
 
   // Byte 3
   //E
   if (currentChord[3][6]) {
-    chordBytes[3] += B00001000;
+    chordBytes[3] |= B00001000;
   }
   //U
   if (currentChord[3][7]) {
-    chordBytes[3] += B00000100;
+    chordBytes[3] |= B00000100;
   }
   //F
   if (currentChord[1][6]) {
-    chordBytes[3] += B00000010;
+    chordBytes[3] |= B00000010;
   }
   //R
   if (currentChord[2][6]) {
-    chordBytes[3] += B00000001;
+    chordBytes[3] |= B00000001;
   }
 
   // Byte 4
   //P
   if (currentChord[1][7]) {
-    chordBytes[4] += B01000000;
+    chordBytes[4] |= B01000000;
   }
   //B
   if (currentChord[2][7]) {
-    chordBytes[4] += B00100000;
+    chordBytes[4] |= B00100000;
   }
   //L
   if (currentChord[1][8]) {
-    chordBytes[4] += B00010000;
+    chordBytes[4] |= B00010000;
   }
   //G
   if (currentChord[2][8]) {
-    chordBytes[4] += B00001000;
+    chordBytes[4] |= B00001000;
   }
   //T
   if (currentChord[1][9]) {
-    chordBytes[4] += B00000100;
+    chordBytes[4] |= B00000100;
   }
   //S
   if (currentChord[2][9]) {
-    chordBytes[4] += B00000010;
+    chordBytes[4] |= B00000010;
   }
   //D
   if (currentChord[1][10]) {
-    chordBytes[4] += B00000001;
+    chordBytes[4] |= B00000001;
   }
 
   // Byte 5
   //Z
   if (currentChord[2][10]) {
-    chordBytes[5] += B00000001;
+    chordBytes[5] |= B00000001;
   }
-
+*/
   // Send chord bytes over serial
   for (int i = 0; i < 6; i++) {
     Serial.write(chordBytes[i]);
