@@ -40,12 +40,12 @@ int rowPins[ROWS] = {4, 5, 6, 7};
 int colPins[COLS] = {8, 9, 10, 11, 12, 14, 15, 16, 18, 19, 20};
 
 // Keyboard state variables
-unsigned long debounceMillis = 20;
-bool inProgress = false;
-bool currentChord[ROWS][COLS];
-bool keyReadings[ROWS][COLS];
-bool realKeys[ROWS][COLS];
-unsigned long debouncingMillis[ROWS][COLS];
+unsigned long debounceMillis = 20;          //time to debounce a key for
+bool inProgress = false;                    //whether or not a stroke is in progress
+bool currentChord[ROWS][COLS];              //keys confirmed to be in current chord
+bool keyReadings[ROWS][COLS];               //raw, noisy key readings
+bool realKeys[ROWS][COLS];                  //debounced key readings
+unsigned long debouncingMillis[ROWS][COLS]; //last debounced keystroke time on each key
 
 // Protocol state
 #define GEMINI 0
