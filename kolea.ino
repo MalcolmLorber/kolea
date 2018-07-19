@@ -26,14 +26,6 @@
 #define COLS 11
 #define PROTOCOL_ADDR 11
 #define DELAY_ADDR 12
-#define DEBUG_MODE 0
-/* The following matrix is shown here for reference only.
-  char keys[ROWS][COLS] = {
-    {' ', '2', '3', '4', '5', ' ', '7', '8', '9', '0', ' '},
-    {' ', 'q', 'w', 'e', 'r', 't', 'u', 'i', 'o', 'p', '['},
-    {' ', 'a', 's', 'd', 'f', 'g', 'j', 'k', 'l', ';', '\''},
-    {' ', ' ', ' ', 'c', 'v', ' ', 'n', 'm', ' ', ' ', ' '}
-  };*/
 
 // Configuration variables
 int rowPins[ROWS] = {4, 5, 6, 7};
@@ -91,7 +83,6 @@ void loop() {
   }
 
   bool anyPressed = false;
-
   //debounce and update chord
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
@@ -254,7 +245,6 @@ void fn1() {
 
 // Fn2 functions
 //    # - set delay based on number button pressed
-//    A - if debug enabled, print some debug info to serial
 void fn2() {
   if (currentChord[0][1])
     debounceMillis = 0;
@@ -272,16 +262,6 @@ void fn2() {
     debounceMillis = 30;
   else if (currentChord[0][9])
     debounceMillis = 35;
-
-
-  if (DEBUG_MODE && currentChord[3][3]) {
-    Serial.println("protocol and delay: ");
-    Serial.println(protocol);
-    Serial.println(debounceMillis);
-    Serial.println("in eeprom: ");
-    Serial.println(EEPROM.read(PROTOCOL_ADDR));
-    Serial.println(EEPROM.read(DELAY_ADDR));
-  }
 }
 
 // Fn1-Fn2 functions
