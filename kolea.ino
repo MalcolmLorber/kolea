@@ -49,6 +49,8 @@ int protocol = GEMINI;
 void setup() {
   Keyboard.begin();
   Serial.begin(9600);
+  
+  //read stored values from eeprom and sanity check them
   protocol = EEPROM.read(PROTOCOL_ADDR);
   if (protocol > 2 || protocol < 0) {
     protocol = 0;
@@ -59,6 +61,8 @@ void setup() {
     debounceMillis = 20;
     EEPROM.write(DELAY_ADDR, 20);
   }
+
+  //set up key matrix
   for (int i = 0; i < COLS; i++)
     pinMode(colPins[i], INPUT_PULLUP);
   for (int i = 0; i < ROWS; i++) {
@@ -197,8 +201,6 @@ void sendChordTxBolt() {
 }
 
 // Send the chord using the current protocol. 
-// In future versions, there should also be a way to handle fn keys presses before
-// they are released, eg. for mouse emulation functionality or custom key presses.
 void sendChord() {
   // If fn keys have been pressed, delegate to corresponding method and return
   if (currentChord[1][0] && currentChord[2][0]) {
