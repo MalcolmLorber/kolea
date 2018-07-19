@@ -81,10 +81,18 @@ void setup() {
 // Read key states and handle all chord events
 void loop() {
   unsigned long curTime = millis();
-  readKeys();
+  
+  //read raw key matrix, may be bouncy
+  for (int i = 0; i < ROWS; i++) {
+    digitalWrite(rowPins[i], LOW);
+    for (int j = 0; j < COLS; j++)
+      keyReadings[i][j] = !digitalRead(colPins[j]);
+    digitalWrite(rowPins[i], HIGH);
+  }
 
   bool anyPressed = false;
 
+  //debounce and update chord
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
       //we see if state has changed AND been given time to debounce
@@ -102,7 +110,7 @@ void loop() {
       anyPressed |= realKeys[i][j];
     }
   }
-  //if no keys are pressed and a chord was started, we send the chord
+  //if no keys are pressed and a chord was started, we send the chord and reset some values
   if (!anyPressed && inProgress) {
     sendChord();
     clearMatrix(currentChord);
@@ -115,19 +123,8 @@ void clearMatrix(bool m[][COLS]) {
   memset(m, 0, sizeof(m[0][0])*ROWS * COLS);
 }
 
-// Read all keys
-void readKeys() {
-  for (int i = 0; i < ROWS; i++) {
-    digitalWrite(rowPins[i], LOW);
-    for (int j = 0; j < COLS; j++)
-      keyReadings[i][j] = !digitalRead(colPins[j]);
-    digitalWrite(rowPins[i], HIGH);
-  }
-}
-
 // Send current chord using NKRO Keyboard emulation
 void sendChordNkro() {
-  // QWERTY mapping
   char qwertyMapping[ROWS][COLS] = {
     {' ', '2', '3', '4', '5', ' ', '7', '8', '9', '0', ' '},
     {' ', 'q', 'w', 'e', 'r', 't', 'u', 'i', 'o', 'p', '['},
@@ -202,14 +199,13 @@ void sendChordTxBolt() {
     }
   }
   for (int i = 0; i < 4; i++) {
-    if (chordBytes[i])
+    if (chordBytes[i])//tx only sends bytes with actual data
       Serial.write(chordBytes[i]);
   }
-  Serial.write(B0);
+  Serial.write(B0); //trailing 0 byte for stability
 }
 
-// Send the chord using the current protocol. If there are fn keys
-// pressed, delegate to the corresponding function instead.
+// Send the chord using the current protocol. 
 // In future versions, there should also be a way to handle fn keys presses before
 // they are released, eg. for mouse emulation functionality or custom key presses.
 void sendChord() {
