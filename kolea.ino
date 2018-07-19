@@ -63,7 +63,7 @@ void setup() {
     EEPROM.write(PROTOCOL_ADDR, 0);
   }
   debounceMillis = EEPROM.read(DELAY_ADDR);
-  if (debounceMillis > 100 || debounceMillis < 0) {
+  if (debounceMillis > 35 || debounceMillis < 0) {
     debounceMillis = 20;
     EEPROM.write(DELAY_ADDR, 20);
   }
@@ -406,26 +406,26 @@ void fn1() {
 // Tip: maybe it is better to avoid using "fn2" key alone in order to avoid
 // accidental activation?
 //
-// Current functions: 
+// Current functions:
 //    # - set delay based on number button pressed
 //    A - if debug enabled, print some debug info to serial
 void fn2() {
   if (currentChord[0][1])
     debounceMillis = 0;
   else if (currentChord[0][2])
-    debounceMillis = 10;
+    debounceMillis = 5;
   else if (currentChord[0][3])
-    debounceMillis = 20;
+    debounceMillis = 10;
   else if (currentChord[0][4])
-    debounceMillis = 30;
+    debounceMillis = 15;
   else if (currentChord[0][6])
-    debounceMillis = 40;
+    debounceMillis = 20;
   else if (currentChord[0][7])
-    debounceMillis = 50;
+    debounceMillis = 25;
   else if (currentChord[0][8])
-    debounceMillis = 60;
+    debounceMillis = 30;
   else if (currentChord[0][9])
-    debounceMillis = 70;
+    debounceMillis = 35;
 
 
   if (DEBUG_MODE && currentChord[3][3]) {
