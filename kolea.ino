@@ -134,22 +134,14 @@ void sendChordNkro() {
     {' ', 'a', 's', 'd', 'f', 'g', 'j', 'k', 'l', ';', '\''},
     {' ', ' ', ' ', 'c', 'v', ' ', 'n', 'm', ' ', ' ', ' '}
   };
-  int keyCounter = 0;
-  char qwertyKeys[ROWS * COLS];
-
   // Calculate qwerty keys array using qwertyMappings[][]
   for (int i = 0; i < ROWS; i++) {
     for (int j = 0; j < COLS; j++) {
       if (currentChord[i][j]) {
-        qwertyKeys[keyCounter] = qwertyMapping[i][j];
-        keyCounter++;
+        if(qwertyMapping[i][j]!=' '){
+          Keyboard.press(qwertyMapping[i][j]);
+        }
       }
-    }
-  }
-  // Emulate keyboard key presses
-  for (int i = 0; i < keyCounter; i++) {
-    if (qwertyKeys[i] != ' ') {
-      Keyboard.press(qwertyKeys[i]);
     }
   }
   Keyboard.releaseAll();
@@ -188,12 +180,6 @@ void sendChordGemini() {
 
 void sendChordTxBolt() {
   byte chordBytes[] = {B0, B0, B0, B0};
-
-  // TX Bolt uses a variable length packet. Only those bytes that have active
-  // keys are sent. The header bytes indicate which keys are being sent. They
-  // must be sent in order. It is a good idea to send a zero after every packet.
-  // 00XXXXXX 01XXXXXX 10XXXXXX 110XXXXX
-  //   HWPKTS   UE*OAR   GLBPRF    #ZDST
 
   unsigned int boltVals[ROWS][COLS] =
   { {0, 208, 208, 208, 208,   0, 208, 208, 208, 208,   0},
@@ -249,12 +235,6 @@ void sendChord() {
 }
 
 // Fn1 functions
-//
-// This function is called when "fn1" key has been pressed, but not "fn2".
-// Tip: maybe it is better to avoid using "fn1" key alone in order to avoid
-// accidental activation?
-//
-// Current functions:
 //    PH-PB   ->   Set NKRO Keyboard emulation mode
 //    PH-G   ->   Set Gemini PR protocol mode
 //    PH-B   ->   Set TX Bolt protocol mode
@@ -277,12 +257,6 @@ void fn1() {
 }
 
 // Fn2 functions
-//
-// This function is called when "fn2" key has been pressed, but not "fn1".
-// Tip: maybe it is better to avoid using "fn2" key alone in order to avoid
-// accidental activation?
-//
-// Current functions:
 //    # - set delay based on number button pressed
 //    A - if debug enabled, print some debug info to serial
 void fn2() {
@@ -315,10 +289,6 @@ void fn2() {
 }
 
 // Fn1-Fn2 functions
-//
-// This function is called when both "fn1" and "fn1" keys have been pressed.
-//
-// Current functions:
 //   *-D   ->   Store Delay
 //   *-Z   ->   Store Protocol
 void fn1fn2() {
