@@ -28,8 +28,8 @@
 #define DELAY_ADDR 12
 
 // Configuration variables
-int rowPins[ROWS] = {4, 5, 6, 7};
-int colPins[COLS] = {8, 9, 10, 11, 12, 14, 15, 16, 18, 19, 20};
+const int rowPins[ROWS] = {4, 5, 6, 7};
+const int colPins[COLS] = {8, 9, 10, 11, 12, 14, 15, 16, 18, 19, 20};
 
 // Keyboard state variables
 unsigned long debounceMillis = 20;          //time to debounce a key for
@@ -68,7 +68,7 @@ void setup() {
   }
   for (int i = 0; i < ROWS; i++) {
     pinMode(rowPins[i], OUTPUT);
-    digitalWrite(rowPins[i], HIGH);
+    digitalWriteFast(rowPins[i], HIGH);
   }
   clearMatrix(currentChord);
   clearMatrix(keyReadings);
@@ -78,13 +78,12 @@ void setup() {
 // Read key states and handle all chord events
 void loop() {
   unsigned long curTime = millis();
-
   //read raw key matrix, may be bouncy
   for (int i = 0; i < ROWS; i++) {
-    digitalWrite(rowPins[i], LOW);
+    digitalWriteFast(rowPins[i], LOW);
     for (int j = 0; j < COLS; j++)
-      keyReadings[i][j] = !digitalRead(colPins[j]);
-    digitalWrite(rowPins[i], HIGH);
+      keyReadings[i][j] = !digitalReadFast(colPins[j]);
+    digitalWriteFast(rowPins[i], HIGH);
   }
 
   bool anyPressed = false;
