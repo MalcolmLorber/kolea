@@ -1,7 +1,5 @@
 /**
    StenoFW is a firmware for Stenoboard keyboards.
-   
-   Modifications for kolea board by Malcolm Lorber
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,8 +15,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
    Copyright 2014 Emanuele Caruso. See LICENSE.txt for details.
-   
-   Copyright 2018 Malcolm Lorber
+*/
+
+/**
+   Matrix modified for the Kolea keyboard.
 */
 #include <EEPROM.h>
 
@@ -83,9 +83,8 @@ void loop() {
     digitalWriteFast(rowPins[i], LOW);
     for (int j = 0; j < COLS; j++)
       keyReadings[i][j] = !digitalReadFast(colPins[j]);
-    digitalWriteFast(rowPins[i], HIGH);
+    digitalWrite(rowPins[i], HIGH);
   }
-
   bool anyPressed = false;
   //debounce and update chord
   for (int i = 0; i < ROWS; i++) {
@@ -204,16 +203,22 @@ void sendChordTxBolt() {
 void sendChord() {
   // If fn keys have been pressed, delegate to corresponding method and return
   if (currentChord[1][0] && currentChord[2][0]) {
-    fn1fn2();
-    return;
+    if (fn1fn2())
+      return;
+    currentChord[1][1] = currentChord[2][1] = true;
+    currentChord[1][0] = currentChord[2][0] = false;
   }
   else if (currentChord[1][0]) {
-    fn1();
-    return;
+    if (fn1())
+      return;
+    currentChord[1][1] = true;
+    currentChord[1][0] = false;
   }
   else if (currentChord[2][0]) {
-    fn2();
-    return;
+    if (fn2())
+      return;
+    currentChord[2][1] = true;
+    currentChord[2][0] = false;
   }
 
   if (protocol == NKRO) {
@@ -231,55 +236,81 @@ void sendChord() {
 //    PH-PB   ->   Set NKRO Keyboard emulation mode
 //    PH-G   ->   Set Gemini PR protocol mode
 //    PH-B   ->   Set TX Bolt protocol mode
-void fn1() {
+bool fn1() {
   // "PH" -> Set protocol
   if (currentChord[1][3] && currentChord[1][4]) {
     // "-PB" -> NKRO Keyboard
     if (currentChord[1][7] && currentChord[2][7]) {
       protocol = NKRO;
+      return true;
     }
     // "-G" -> Gemini PR
     else if (currentChord[2][8]) {
       protocol = GEMINI;
+      return true;
     }
     // "-B" -> TX Bolt
     else if (currentChord[2][7]) {
       protocol = TXBOLT;
+      return true;
     }
   }
+  return false;
 }
 
 // Fn2 functions
-//    # - set delay based on number button pressed
-void fn2() {
-  if (currentChord[0][1])
-    debounceMillis = 0;
-  else if (currentChord[0][2])
-    debounceMillis = 5;
-  else if (currentChord[0][3])
-    debounceMillis = 10;
-  else if (currentChord[0][4])
-    debounceMillis = 15;
-  else if (currentChord[0][6])
-    debounceMillis = 20;
-  else if (currentChord[0][7])
-    debounceMillis = 25;
-  else if (currentChord[0][8])
-    debounceMillis = 30;
-  else if (currentChord[0][9])
-    debounceMillis = 35;
+//    #AE - set delay based on number button pressed
+bool fn2() {
+  if (currentChord[0][3] && currentChord[0][4]) {
+    if (currentChord[0][1]) {
+      debounceMillis = 0;
+      return true;
+    }
+    else if (currentChord[0][2]) {
+      debounceMillis = 5;
+      return true;
+    }
+    else if (currentChord[0][3]) {
+      debounceMillis = 10;
+      return true;
+    }
+    else if (currentChord[0][4]) {
+      debounceMillis = 15;
+      return true;
+    }
+    else if (currentChord[0][6]) {
+      debounceMillis = 20;
+      return true;
+    }
+    else if (currentChord[0][7]) {
+      debounceMillis = 25;
+      return true;
+    }
+    else if (currentChord[0][8]) {
+      debounceMillis = 30;
+      return true;
+    }
+    else if (currentChord[0][9]) {
+      debounceMillis = 35;
+      return true;
+    }
+  }
+  return false;
 }
 
 // Fn1-Fn2 functions
 //   *-D   ->   Store Delay
 //   *-Z   ->   Store Protocol
-void fn1fn2() {
+bool fn1fn2() {
   if (currentChord[1][5] || currentChord[2][5]) {
     if (currentChord[1][10]) {
       EEPROM.write(DELAY_ADDR, debounceMillis);
+      return true;
     }
     if (currentChord[2][10]) {
       EEPROM.write(PROTOCOL_ADDR, protocol);
+      return true;
     }
   }
+  return false;
 }
